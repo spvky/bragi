@@ -20,7 +20,7 @@ find_max_in_direction :: proc(p1: []Vec2, d: Vec2) -> Vec2 {
 
 support :: proc(p1,p2: []Vec2, d: Vec2) -> Vec2 {
 	a:= find_max_in_direction(p1,d)
-	b:= find_max_in_direction(p2,d)
+	b:= find_max_in_direction(p2,-d)
 	return a - b
 }
 
@@ -29,6 +29,12 @@ perependicular :: proc(a: Vec2) -> Vec2 {
 }
 
 vtp :: proc(a,b,c: Vec2) -> Vec2 {
+	// d,e,f: [3]f32
+	// d = {a.x,a.y,0}
+	// e = {b.x,b.y,0}
+	// f = {c.x,c.y,0}
+	// result := l.vector_triple_product(d,e,f)
+	// return {result.x,result.y}
 	return (l.dot(a,c) * b) - (l.dot(a,b) * c)
 }
 
