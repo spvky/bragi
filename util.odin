@@ -14,6 +14,11 @@ Simplex :: struct {
 	count: int
 }
 
+Sphere :: struct {
+	translation: Vec3,
+	radius: f32
+}
+
 simplex_update :: proc(s: ^Simplex) {
 	s.d = s.c
 	s.c = s.b
@@ -43,9 +48,31 @@ find_max_in_direction :: proc(p1: []Vec3, d: Vec3) -> Vec3 {
 	return p1[max_index]
 }
 
-support :: proc(p1,p2: []Vec3, d: Vec3) -> Vec3 {
+find_max_in_direction_sphere :: proc(s: Sphere, d: Vec3) -> Vec3 {
+	return s.translation + (s.radius * d) / l.length(d)
+}
+
+support :: proc {
+	poly_poly_support,
+	poly_sphere_support,
+	sphere_sphere_support,
+}
+
+poly_poly_support :: proc(p1,p2: []Vec3, d: Vec3) -> Vec3 {
 	a:= find_max_in_direction(p1,d)
 	b:= find_max_in_direction(p2,-d)
+	return a - b
+}
+
+poly_sphere_support :: proc(p: []Vec3, s: Sphere, d: Vec3) -> Vec3 {
+	a:= find_max_in_direction(p,d)
+	b:= find_max_in_direction_sphere(s,-d)
+	return a - b
+}
+
+sphere_sphere_support :: proc(s1,s2: Sphere, d: Vec3) -> Vec3 {
+	a:= find_max_in_direction_sphere(s1, d)
+	b:= find_max_in_direction_sphere(s2, -d)
 	return a - b
 }
 
