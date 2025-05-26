@@ -15,6 +15,10 @@ Triangle :: struct {
 	colliding: bool
 }
 
+draw_circle :: proc(s: Sphere) {
+	rl.DrawCircleV({s.translation.x,s.translation.y}, s.radius, rl.BLUE)
+}
+
 draw_triangle :: proc(t: Triangle) {
 	points:= transformed_points(t)
 
@@ -76,11 +80,12 @@ main :: proc() {
 		a_points := transformed_points(a)
 		b_points := transformed_points(b)
 
-		a.colliding = gjk(a_points[:], b_points[:])
+		a.colliding = gjk(a_points[:], b_points[:]) || gjk(a_points[:],c)
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.WHITE)
 		draw_triangle(a)
 		draw_triangle(b)
+		draw_circle(c)
 		rl.EndDrawing()
 	}
 }

@@ -14,6 +14,8 @@ Simplex :: struct {
 	count: int
 }
 
+PointList :: []Vec3
+
 Sphere :: struct {
 	translation: Vec3,
 	radius: f32
@@ -76,8 +78,16 @@ sphere_sphere_support :: proc(s1,s2: Sphere, d: Vec3) -> Vec3 {
 	return a - b
 }
 
+avg :: proc {
+	avg_sphere,
+	avg_points,
+}
 
-avg :: proc(p1: []Vec3) -> Vec3 {
+avg_sphere :: proc(s: Sphere) -> Vec3 {
+	return s.translation
+}
+
+avg_points :: proc(p1: []Vec3) -> Vec3 {
 	a: Vec3
 	for p in p1 {
 		a += p
