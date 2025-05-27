@@ -15,6 +15,7 @@ Triangle :: struct {
 	colliding: bool
 }
 
+
 draw_circle :: proc(s: Sphere) {
 	rl.DrawCircleV({s.translation.x,s.translation.y}, s.radius, rl.BLUE)
 }
