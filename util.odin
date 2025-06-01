@@ -28,6 +28,10 @@ simplex_update :: proc(s: ^Simplex) {
 	s.count += 1
 }
 
+calculate_aabb :: proc(p: PointList) {
+	// TODO: Find the fastest way to create and store AABB
+}
+
 crossed_origin :: proc(p: Vec3, d: Vec3) -> bool {
 	return l.dot(p,d) < 0
 }
