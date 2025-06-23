@@ -3,6 +3,7 @@ package bragi
 import l "core:math/linalg"
 import "core:log"
 import "core:math/rand"
+import "core:math"
 import "base:intrinsics"
 
 Vec3 :: [3]f32
@@ -66,12 +67,21 @@ find_max_in_direction_sphere :: proc(s: Sphere, d: Vec3) -> Vec3 {
 }
 
 find_max_in_direction_capsule :: proc(c: Capsule, d: Vec3) -> Vec3 {
+	// norm_d := l.normalize(d)
+	// start, end := c.translation - {0,c.height/2,0}, c.translation + {0,c.height/2,0}
+	// line := end - start
+	// dot := l.dot(Vec3{0,1,0}, norm_d)
+	// center := line * dot
+	// return center + ((c.radius * d) / l.length(d))
 	norm_d := l.normalize(d)
-	start, end := c.translation - {0,c.height/2,0}, c.translation + {0,c.height/2,0}
-	line := end - start
-	dot := l.dot(Vec3{0,1,0}, norm_d)
-	center := line * dot
-	return center + ((c.radius * d) / l.length(d))
+	half_height := c.height / 2
+	top,bottom := c.translation + {0,half_height,0}, c.translation - {0, half_height, 0}
+	top_dot, bot_dot := l.dot(top,norm_d), l.dot(bottom,norm_d)
+	if top_dot > bot_dot {
+		return top + (c.radius * norm_d)
+	} else {
+		return bottom + (c.radius * norm_d)
+	}
 }
 
 find_max_in_direction :: proc {

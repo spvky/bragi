@@ -86,3 +86,20 @@ test_gjk_2d :: proc(t: ^testing.T) {
 
 	testing.expect(t,gjk(s1[:],s2[:]))
 }
+
+@(test)
+test_gjk_2d_capsule :: proc(t: ^testing.T) {
+	s1:= [?]Vec3 {
+		{0,0,0},
+		{10,10,0},
+		{0,10,0},
+		{10,0,0},
+	}
+	s2:= Capsule {
+		translation = {5,-2,0},
+		radius = 1,
+		height = 3
+	}
+
+	testing.expect(t,gjk(s1[:],s2))
+}

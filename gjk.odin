@@ -5,7 +5,7 @@ import sa "core:container/small_array"
 import "core:log"
 import "base:intrinsics"
 
-gjk :: proc(s1: $T, s2: $V) -> bool  where (T == PointList || T == Sphere) && (V == PointList || V == Sphere) {
+gjk :: proc(s1: $T, s2: $V) -> bool  where (T == PointList || T == Sphere || T == Capsule) && (V == PointList || V == Sphere || V == Capsule) {
 	simplex: Simplex
 	d:= avg(s1) - avg(s2)
 	simplex.a = support(s1,s2,d)
