@@ -3,6 +3,7 @@ package bragi
 import l "core:math/linalg"
 import "core:log"
 import "core:math/rand"
+import "base:intrinsics"
 
 Vec3 :: [3]f32
 
@@ -19,6 +20,12 @@ PointList :: []Vec3
 Sphere :: struct {
 	translation: Vec3,
 	radius: f32
+}
+
+Capsule :: struct {
+	translation: Vec3,
+	radius: f32,
+	height: f32
 }
 
 simplex_update :: proc(s: ^Simplex) {
@@ -40,7 +47,7 @@ same_direction :: proc(a,b: Vec3) -> bool {
 	return l.dot(a,b) > 0
 }
 
-find_max_in_direction :: proc(p1: []Vec3, d: Vec3) -> Vec3 {
+find_max_in_direction_polygon :: proc(p1: []Vec3, d: Vec3) -> Vec3 {
 	max_dot:= l.dot(p1[0],d)
 	max_index: int
 
@@ -58,37 +65,43 @@ find_max_in_direction_sphere :: proc(s: Sphere, d: Vec3) -> Vec3 {
 	return s.translation + (s.radius * d) / l.length(d)
 }
 
-support :: proc {
-	poly_poly_support,
-	poly_sphere_support,
-	sphere_sphere_support,
+find_max_in_direction_capsule :: proc(c: Capsule, d: Vec3) -> Vec3 {
+	norm_d := l.normalize(d)
+	start, end := c.translation - {0,c.height/2,0}, c.translation + {0,c.height/2,0}
+	line := end - start
+	dot := l.dot(Vec3{0,1,0}, norm_d)
+	center := line * dot
+	return center + ((c.radius * d) / l.length(d))
 }
 
-poly_poly_support :: proc(p1,p2: []Vec3, d: Vec3) -> Vec3 {
-	a:= find_max_in_direction(p1,d)
-	b:= find_max_in_direction(p2,-d)
-	return a - b
+find_max_in_direction :: proc {
+	find_max_in_direction_capsule,
+	find_max_in_direction_polygon,
+	find_max_in_direction_sphere,
 }
 
-poly_sphere_support :: proc(p: []Vec3, s: Sphere, d: Vec3) -> Vec3 {
-	a:= find_max_in_direction(p,d)
-	b:= find_max_in_direction_sphere(s,-d)
-	return a - b
-}
-
-sphere_sphere_support :: proc(s1,s2: Sphere, d: Vec3) -> Vec3 {
-	a:= find_max_in_direction_sphere(s1, d)
-	b:= find_max_in_direction_sphere(s2, -d)
+support :: proc(s1: $T, s2: $V, d: Vec3) -> Vec3 
+	where
+		T == Capsule || T == Sphere || T == []Vec3,
+		V == Capsule || V == Sphere || V == []Vec3
+{
+	a := find_max_in_direction(s1, d)
+	b := find_max_in_direction(s2, -d)
 	return a - b
 }
 
 avg :: proc {
 	avg_sphere,
 	avg_points,
+	avg_capsule,
 }
 
 avg_sphere :: proc(s: Sphere) -> Vec3 {
 	return s.translation
+}
+
+avg_capsule :: proc(c: Capsule) -> Vec3 {
+	return c.translation
 }
 
 avg_points :: proc(p1: []Vec3) -> Vec3 {
