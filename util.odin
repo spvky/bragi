@@ -6,6 +6,7 @@ import "core:math/rand"
 import "core:math"
 import "base:intrinsics"
 
+Vec2 :: [2]f32
 Vec3 :: [3]f32
 
 Simplex :: struct {
@@ -27,6 +28,10 @@ Capsule :: struct {
 	translation: Vec3,
 	radius: f32,
 	height: f32
+}
+
+extend :: proc(val: Vec2, z: f32) -> Vec3 {
+	return Vec3{val.x,val.y,z}
 }
 
 simplex_update :: proc(s: ^Simplex) {
