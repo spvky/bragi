@@ -1,37 +1,57 @@
 package bragi
 
-import l "core:math/linalg"
-import "core:log"
-import "core:math/rand"
-import "core:math"
 import "base:intrinsics"
+import "core:log"
+import "core:math"
+import l "core:math/linalg"
+import "core:math/rand"
 
 Vec2 :: [2]f32
 Vec3 :: [3]f32
 
 Simplex :: struct {
-	a: Vec3,
-	b: Vec3,
-	c: Vec3,
-	d: Vec3,
-	count: int
+	a:     Vec3,
+	b:     Vec3,
+	c:     Vec3,
+	d:     Vec3,
+	count: int,
 }
+
+// Converts a simplex into a polytope A:(temp_allocator)
+polytope_from_simplex :: proc(s: Simplex) -> (p: Polytope, ok: bool) {
+	switch s.count {
+	case 3:
+		p.points = make([dynamic]Vec3, 0, 8, allocator = context.temp_allocator)
+		append_elems(&p.points, s.a, s.b, s.c)
+	case 4:
+		p.points = make([dynamic]Vec3, 0, 8, allocator = context.temp_allocator)
+		append_elems(&p.points, s.a, s.b, s.c, s.d)
+	case:
+		return
+	}
+}
+
+Polytope :: struct {
+	points: [dynamic]Vec3,
+}
+
+Collision :: struct {}
 
 PointList :: []Vec3
 
 Sphere :: struct {
 	translation: Vec3,
-	radius: f32
+	radius:      f32,
 }
 
 Capsule :: struct {
 	translation: Vec3,
-	radius: f32,
-	height: f32
+	radius:      f32,
+	height:      f32,
 }
 
 extend :: proc(val: Vec2, z: f32) -> Vec3 {
-	return Vec3{val.x,val.y,z}
+	return Vec3{val.x, val.y, z}
 }
 
 simplex_update :: proc(s: ^Simplex) {
@@ -46,19 +66,19 @@ calculate_aabb :: proc(p: PointList) {
 }
 
 crossed_origin :: proc(p: Vec3, d: Vec3) -> bool {
-	return l.dot(p,d) < 0
+	return l.dot(p, d) < 0
 }
 
-same_direction :: proc(a,b: Vec3) -> bool {
-	return l.dot(a,b) > 0
+same_direction :: proc(a, b: Vec3) -> bool {
+	return l.dot(a, b) > 0
 }
 
 find_max_in_direction_polygon :: proc(p1: []Vec3, d: Vec3) -> Vec3 {
-	max_dot:= l.dot(p1[0],d)
+	max_dot := l.dot(p1[0], d)
 	max_index: int
 
-	for p,i in p1 {
-		dot := l.dot(p,d)
+	for p, i in p1 {
+		dot := l.dot(p, d)
 		if dot > max_dot {
 			max_dot = dot
 			max_index = i
@@ -80,8 +100,8 @@ find_max_in_direction_capsule :: proc(c: Capsule, d: Vec3) -> Vec3 {
 	// return center + ((c.radius * d) / l.length(d))
 	norm_d := l.normalize(d)
 	half_height := c.height / 2
-	top,bottom := c.translation + {0,half_height,0}, c.translation - {0, half_height, 0}
-	top_dot, bot_dot := l.dot(top,norm_d), l.dot(bottom,norm_d)
+	top, bottom := c.translation + {0, half_height, 0}, c.translation - {0, half_height, 0}
+	top_dot, bot_dot := l.dot(top, norm_d), l.dot(bottom, norm_d)
 	if top_dot > bot_dot {
 		return top + (c.radius * norm_d)
 	} else {
@@ -95,11 +115,8 @@ find_max_in_direction :: proc {
 	find_max_in_direction_sphere,
 }
 
-support :: proc(s1: $T, s2: $V, d: Vec3) -> Vec3 
-	where
-		T == Capsule || T == Sphere || T == []Vec3,
-		V == Capsule || V == Sphere || V == []Vec3
-{
+support :: proc(s1: $T, s2: $V, d: Vec3) -> Vec3 where T == Capsule || T == Sphere || T == []Vec3,
+	V == Capsule || V == Sphere || V == []Vec3 {
 	a := find_max_in_direction(s1, d)
 	b := find_max_in_direction(s2, -d)
 	return a - b

@@ -58,7 +58,7 @@ test_gjk :: proc(t: ^testing.T) {
 		{15,20,25},
 	}
 
-	testing.expect(t,gjk(s1[:],s2[:]))
+	testing.expect(t,collision(s1[:],s2[:]))
 }
 
 @(test)
@@ -84,7 +84,7 @@ test_gjk_2d :: proc(t: ^testing.T) {
 		{15,20,0},
 	}
 
-	testing.expect(t,gjk(s1[:],s2[:]))
+	testing.expect(t,collision(s1[:],s2[:]))
 }
 
 @(test)
@@ -101,5 +101,5 @@ test_gjk_2d_capsule :: proc(t: ^testing.T) {
 		height = 3
 	}
 
-	testing.expect(t,gjk(s1[:],s2))
+	testing.expect(t,collision(s1[:],s2))
 }
