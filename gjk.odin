@@ -78,11 +78,10 @@ collision_pro :: proc(
 	return false
 }
 
-
 epa :: proc(
 	s: Simplex,
 	s1: $T,
-	s2L: $V,
+	s2: $V,
 ) -> Collision where (T == PointList || T == Sphere || T == Capsule) &&
 	(V == PointList || V == Sphere || V == Capsule) {
 	if p, ok = polytope_from_simplex(s); ok {
@@ -102,6 +101,55 @@ epa :: proc(
 			}
 
 		}
+	}
+}
+epa_full :: proc(
+	s: Simplex,
+	s1: $T,
+	s2: $V,
+) -> Collision where (T == PointList || T == Sphere || T == Capsule) &&
+	(V == PointList || V == Sphere || V == Capsule) {
+
+	MAX_ITERATIONS :: 64
+	MAX_FACES :: 64
+	MAX_LOOS_EDGES :: 32
+	TOLERANCE :: 0.0001
+
+	if p, ok = polytope_from_simplex(s); ok {
+		faces: [64][4]Vec3
+		faces[0][0] = simplex.a
+		faces[0][1] = simplex.b
+		faces[0][2] = simplex.c
+		faces[0][3] = l.normalize(l.cross(simplex.b - simplex.a, simplex.c - simplex.a)) // abc normal
+		faces[1][0] = simplex.a
+		faces[1][1] = simplex.c
+		faces[1][2] = simplex.d
+		faces[1][3] = l.normalize(l.cross(simplex.c - simplex.a, simplex.d - simplex.a)) // acd normal
+		faces[2][0] = simplex.a
+		faces[2][1] = simplex.d
+		faces[2][2] = simplex.b
+		faces[2][3] = l.normalize(l.cross(simplex.d - simplex.a, simplex.b - simplex.a)) // adb normal
+		faces[3][0] = simplex.b
+		faces[3][1] = simplex.d
+		faces[3][2] = simplex.c
+		faces[3][3] = l.normalize(l.cross(simplex.d - simplex.b, simplex.c - simplex.b)) // bdc normal
+
+		num_faces := 4
+		closest_face: int
+
+		for i in 0 ..< MAX_ITERATIONS {
+			min_dist := l.dot(faces[0][0], faces[0][3])
+			closest_face = 0
+			for j in 1 .. num_faces {
+				dist := l.dot(faces[i][0], faces[i][3])
+				if dist < min_dist {
+					min_dist = dist
+					closest_face = j
+				}
+			}
+		}
+
+
 	}
 }
 
